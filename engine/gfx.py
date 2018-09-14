@@ -150,10 +150,10 @@ def init():
     _screenbuf = []
 
     (width, height) = _tty_size()
-    for y in range(0, height-1):
+    for y in range(0, height):
 
         row = []
-        for x in range(0, width-1):
+        for x in range(0, width):
             row.append((' ', WHITE, BLACK))
         _screenbuf.append(row)
 
@@ -176,15 +176,17 @@ def shutdown():
     sys.stdout.flush()
 
 
-def plot(x, y, char, fg=-1, bg=-1):
+def plot(char, pos, fg=-1, bg=-1):
     """Set the character at the given position on screen"""
 
     global _screenbuf
 
-    if y > 0 and y < len(_screenbuf):
+    x, y = pos
+
+    if y >= 0 and y < len(_screenbuf):
         row = _screenbuf[y]
 
-        if x > 0 and x < len(row):
+        if x >= 0 and x < len(row):
 
             _, current_fg, current_bg = _screenbuf[y][x]
             if fg < 0:
@@ -194,17 +196,18 @@ def plot(x, y, char, fg=-1, bg=-1):
             _screenbuf[y][x] = (char, fg, bg)
 
 
-def get(x, y):
+def get(pos):
     """Get the character at the given position on screen"""
 
     global _screenbuf
 
+    x, y = pos
     value = (' ', WHITE, BLACK)
 
-    if y > 0 and y < len(_screenbuf):
+    if y >= 0 and y < len(_screenbuf):
         row = _screenbuf[y]
 
-        if x > 0 and x < len(row):
+        if x >= 0 and x < len(row):
             value = row[x]
 
     return value
@@ -215,10 +218,10 @@ def cls(fg=WHITE, bg=BLACK):
 
     global _screenbuf
 
-    for y in range(0, len(_screenbuf)-1):
+    for y in range(0, len(_screenbuf)):
         row = _screenbuf[y]
 
-        for x in range(0, len(row)-1):
+        for x in range(0, len(row)):
             _screenbuf[y][x] = (' ', fg, bg)
 
 
@@ -233,12 +236,12 @@ def flip():
         _cursor_left(len(_screenbuf[0]))
 
     # render each row in the screenbuf
-    for y in range(0, len(_screenbuf)-1):
+    for y in range(0, len(_screenbuf)):
         row = _screenbuf[y]
 
         # render each cell in the row
         x = 0
-        while x < len(row)-1:
+        while x < len(row):
             char, fg, bg = row[x]
 
             # TODO optimise this rendering
@@ -259,7 +262,7 @@ def flip():
             x += 1
 
         # add newlines for all but the last row
-        if y < len(_screenbuf):
+        if y < len(_screenbuf)-1:
             sys.stdout.write("\n")
 
     # flush the output buffer so the terminal actually renders the screen

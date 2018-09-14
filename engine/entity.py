@@ -15,15 +15,25 @@ class EntityType:
         :param bg: Background colour of the entity
         """
 
-        self._char = char
-        self._fg = fg
-        self._bg = bg
+        self.char = char
+        self.fg = fg
+        self.bg = bg
 
 
-    def update(self, entity):
+    def spawn(self, pos):
+        """
+        Spawn & return a new entity of this type at the given location
+        :param pos: 2 tuple of the new entities location on the map
+        """
+
+        return Entity(self, pos)
+
+
+    def update(self, entity, key):
         """
         Update the given entity instance.
         :param entity: The entity instance to update
+        :param key: The key which was pressed to cause the update
         """
         pass
 
@@ -34,12 +44,10 @@ class EntityType:
         :param entity: The entity instance to render
         """
 
-        engine.gfx.fg(self._fg)
-        engine.gfx.bg(self._bg)
-
         engine.gfx.plot(
-            self._char,
-            entity.x, entity.y
+            self.char,
+            (entity.x, entity.y),
+            self.fg, self.bg
         )
 
 
@@ -47,10 +55,22 @@ class Entity:
     """Single entity. Will have a single EntityType associated with it."""
 
 
-    def __init__(self, entity_type):
+    def __init__(self, entity_type, pos):
         """
 
-        :param entty_type: The EntityType for the entity
+        :param entity_type: The EntityType for the entity
+        :param pos: 2 tuple of the entities position on the map
         """
+
+        self.x, self.y = pos
+        self.entity_type = entity_type
+
+
+    def update(self, key):
+        """Render the entity to the screen"""
+        self.entity_type.update(self, key)
+
 
     def render(self):
+        """Render the entity to the screen"""
+        self.entity_type.render(self)
