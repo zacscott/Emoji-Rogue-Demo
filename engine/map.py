@@ -8,7 +8,7 @@ class Map:
     def __init__(self, **kwargs):
         """
 
-        :param dimensions: 2 tuple of the nmap dimensions. Default = (32, 32)
+        :param dimensions: 2 tuple of the nmap dimensions. Default = (80, 40)
         :param perimeter_block: Block to insert around the perimeter of the map. Default =
             ('X', engine.gfx.BLACK, engine.gfx.WHITE)
         :param default_block: The default map block which the map is flood filled with to begin with. Default =
@@ -120,8 +120,14 @@ class Map:
 
         offset_x, offset_y = offset
 
-        for x in range(offset_x, map_width):
-            for y in range(offset_y, map_height):
+        width = offset_x + term_width
+        width = min(width, map_width)
+
+        height = offset_y + term_height
+        height = min(height, map_height)
+
+        for x in range(offset_x, width):
+            for y in range(offset_y, height):
                 if x >= 0 and y >= 0:
                     block = self.map[y][x]
                     engine.gfx.plot((x-offset_x, y-offset_y), block)

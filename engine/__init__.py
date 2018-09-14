@@ -119,13 +119,15 @@ class Game:
             while self.running:
                 self._step()
 
-        except Exception as ex:
-            sys.stderr.write("%s\n" % str(ex))
-            # TODO display trace
+            # Shutdowntdown properly to return terminal to previous state
+            engine.gfx.shutdown()
+            self.shutdown()
 
-        # shitdown properly to return terminal to previous state
-        engine.gfx.shutdown()
-        self.shutdown()
+        except Exception as ex:
+
+            engine.gfx.shutdown()
+            sys.stderr.write("%s\n\n" % str(ex))
+            # TODO display trace
 
 
     def _step(self):
