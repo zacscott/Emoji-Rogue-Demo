@@ -8,7 +8,7 @@ class Map:
     def __init__(self, **kwargs):
         """
 
-        :param dimensions: 2 tuple of the nmap dimensions. Default = (112, 32)
+        :param dimensions: 2 tuple of the nmap dimensions. Default = (32, 32)
         :param perimeter_block: Block to insert around the perimeter of the map. Default =
             ('X', engine.gfx.BLACK, engine.gfx.WHITE)
         :param default_block: The default map block which the map is flood filled with to begin with. Default =
@@ -20,7 +20,7 @@ class Map:
 
         # parse kwargs
 
-        self.dimensions = kwargs['dimensions'] if 'dimensions' in kwargs else (112, 32)
+        self.dimensions = kwargs['dimensions'] if 'dimensions' in kwargs else (80, 40)
 
         if 'perimeter_block' in kwargs:
             self.perimeter_block = kwargs['perimeter_block']
@@ -104,10 +104,10 @@ class Map:
         """
 
         x, y = pos
-        mapw, maph = self.dimensions
+        map_width, map_height = self.dimensions
 
-        in_bounds = x >= 0 and x < mapw
-        in_bounds = in_bounds and y >= 0 and y < maph
+        in_bounds = x >= 0 and x < map_width
+        in_bounds = in_bounds and y >= 0 and y < map_height
 
         return in_bounds
 

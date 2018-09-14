@@ -104,19 +104,26 @@ class Game:
     def run(self):
         """Start running the game. Will not return until the game has been quit / stopped."""
 
-        # try:
+        try:
 
-        engine.gfx.init()
-        self.init()
+            # initialise
+            engine.gfx.init()
+            self.init()
 
-        self.running = True
-        while self.running:
-            self._step()
+            # prime first render
+            self._update(chr(0))
+            self._render()
 
-        # except Exception as ex:
-        #     sys.stderr.write("%s\n" % str(ex))
+            # run the game loop
+            self.running = True
+            while self.running:
+                self._step()
+
+        except Exception as ex:
+            sys.stderr.write("%s\n" % str(ex))
             # TODO display trace
 
+        # shitdown properly to return terminal to previous state
         engine.gfx.shutdown()
         self.shutdown()
 

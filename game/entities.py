@@ -14,15 +14,15 @@ class PlayerEntityType(engine.entity.EntityType):
 
         new_x, new_y = entity.x, entity.y
 
-        # handle WASF player movement
+        # handle WASD player movement
         if key == 'w':
             new_y -= 1
         elif key == 's':
             new_y += 1
         elif key == 'a':
-            new_x -= 2
+            new_x -= 1
         elif key == 'd':
-            new_x += 2
+            new_x += 1
 
         # move the player to the new location if there is nothing on the map blocking them
         themap = self.game.map

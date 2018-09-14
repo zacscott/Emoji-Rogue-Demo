@@ -1,3 +1,4 @@
+import math
 import os
 import sys
 import tty
@@ -153,7 +154,7 @@ def init():
     for y in range(0, height):
 
         row = []
-        for x in range(0, width):
+        for x in range(0, int(math.floor(width/2)-1)):
             row.append((' ', WHITE, BLACK))
         _screenbuf.append(row)
 
@@ -185,7 +186,8 @@ def size():
 
     if _screenbuf:
         height = len(_screenbuf)
-        width = len(_screenbuf[0])
+        width = int(len(_screenbuf[0]))
+            # NOTE we return half width since we double up chars on x axis
 
     return (width, height)
 
@@ -228,7 +230,7 @@ def get(pos):
     return block
 
 
-def cls(block):
+def cls(block=(' ', None, BLACK)):
     """Clear the screen"""
 
     global _screenbuf
@@ -246,17 +248,17 @@ def flip():
     global _screenbuf
 
     # move cursor all the way back to the first line
-    _cursor_up(len(_screenbuf))
-    if len(_screenbuf):
-        _cursor_left(len(_screenbuf[0]))
+    width, height = size()
+    _cursor_left(width*2)
+    _cursor_up(height)
 
     # render each row in the screenbuf
-    for y in range(0, len(_screenbuf)):
+    for y in range(0, height):
         row = _screenbuf[y]
 
         # render each cell in the row
-        x = 0
-        while x < len(row):
+        row_string = ""
+        for x in range(0, width):
             char, fg, bg = row[x]
 
             # TODO optimise this rendering
@@ -264,20 +266,18 @@ def flip():
             #      2. only set bg/fg colours if they have changed, not every time
 
             if char == ' ':
-                string = "%s " % _bg_code(bg)
-                sys.stdout.write(string)
+                # spaces are simple, just a BG colour + "  "
+                row_string += "%s  " % _bg_code(bg)
+            elif ord(char) > 127:
+                # assuming emoji are double width chars
+                row_string += "%s%s%s" % (_bg_code(bg), _fg_code(fg), char)
             else:
-                string = "%s%s%s" % (_bg_code(bg), _fg_code(fg), char)
-                sys.stdout.write(string)
+                # double up on normal ASCII chars
+                row_string += "%s%s%s%s" % (_bg_code(bg), _fg_code(fg), char, char)
 
-            # assume all non-ascii characters are emoji, and double space them
-            if ord(char) > 127:
-                x += 1  # skip next char since emoji are double width
-
-            x += 1
-
-        # add newlines for all but the last row
-        if y < len(_screenbuf)-1:
+        # output the line to term
+        sys.stdout.write(row_string)
+        if y < height-1:  # add newlines for all but the last row
             sys.stdout.write("\n")
 
     # flush the output buffer so the terminal actually renders the screen
