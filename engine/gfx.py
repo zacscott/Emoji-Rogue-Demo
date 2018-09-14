@@ -150,14 +150,11 @@ def init():
     _screenbuf = []
 
     (width, height) = _tty_size()
-    for y in range(0, height):
+    for y in range(0, height-1):
 
         row = []
-        for x in range(0, width):
-            row.append(
-                (' ', WHITE, BLACK)
-            )
-
+        for x in range(0, width-1):
+            row.append((' ', WHITE, BLACK))
         _screenbuf.append(row)
 
     flip()
@@ -185,8 +182,8 @@ def plot(x, y, char, fg=-1, bg=-1):
     global _screenbuf
 
     if y > 0 and y < len(_screenbuf):
-
         row = _screenbuf[y]
+
         if x > 0 and x < len(row):
 
             _, current_fg, current_bg = _screenbuf[y][x]
@@ -205,10 +202,9 @@ def get(x, y):
     value = (' ', WHITE, BLACK)
 
     if y > 0 and y < len(_screenbuf):
-
         row = _screenbuf[y]
-        if x > 0 and x < len(row):
 
+        if x > 0 and x < len(row):
             value = row[x]
 
     return value
@@ -219,18 +215,11 @@ def cls(fg=WHITE, bg=BLACK):
 
     global _screenbuf
 
-    _screenbuf = []
+    for y in range(0, len(_screenbuf)-1):
+        row = _screenbuf[y]
 
-    (width, height) = _tty_size()
-    for y in range(0, height):
-
-        row = []
-        for x in range(0, width):
-            row.append(
-                (' ', fg, bg)
-            )
-
-        _screenbuf.append(row)
+        for x in range(0, len(row)-1):
+            _screenbuf[y][x] = (' ', fg, bg)
 
 
 def flip():
@@ -265,7 +254,7 @@ def flip():
 
             # assume all non-ascii characters are emoji, and double space them
             if ord(char) > 127:
-                x += 1  # skip next char since emoji are doublewidth
+                x += 1  # skip next char since emoji are double width
 
             x += 1
 
