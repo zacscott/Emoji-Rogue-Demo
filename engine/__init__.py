@@ -3,6 +3,7 @@ import time
 import engine.entity
 import engine.gfx
 import engine.input
+import engine.map
 
 
 class Game:
@@ -25,6 +26,10 @@ class Game:
 
         self.running = False
         self.fps = 10
+
+        self.camera = (0, 0)
+
+        self.map = engine.map.Map()
 
         self.entity_types = {}
         self.entities = []
@@ -98,17 +103,17 @@ class Game:
     def run(self):
         """Start running the game. Will not return until the game has been quit / stopped."""
 
-        try:
+        # try:
 
-            engine.gfx.init()
-            self.init()
+        engine.gfx.init()
+        self.init()
 
-            self.running = True
-            while self.running:
-                self._step()
+        self.running = True
+        while self.running:
+            self._step()
 
-        except Exception as ex:
-            sys.stderr.write("%s\n" % str(ex))
+        # except Exception as ex:
+        #     sys.stderr.write("%s\n" % str(ex))
             # TODO display trace
 
         engine.gfx.shutdown()
@@ -150,11 +155,15 @@ class Game:
 
         self.pre_render()
 
-        engine.gfx.cls(-1, engine.gfx.RED)
+        # draw out of bounds XXX, just in case something fucks up we can see where the map ends
+        engine.gfx.cls(('#', engine.gfx.BLACK, engine.gfx.RED))
 
-        # render all of the game entities
+        # step 1 render the map
+        self.map.render(self.camera)
+
+        # step2; render all of the game entities
         for entity in self.entities:
-            entity.render()
+            entity.render(self.camera)
 
         self.post_render()
 

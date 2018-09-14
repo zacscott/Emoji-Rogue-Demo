@@ -7,7 +7,7 @@ class EntityType:
     Child classes should override update() for each entity type.
     """
 
-    def __init__(self, char, fg, bg):
+    def __init__(self, char, fg=None, bg=None):
         """
 
         :param char: Character displayed for the entity
@@ -38,16 +38,17 @@ class EntityType:
         pass
 
 
-    def render(self, entity):
+    def render(self, entity, offset):
         """
         Render the given entity to the console.
         :param entity: The entity instance to render
         """
 
+        offset_x, offset_y = offset
+
         engine.gfx.plot(
-            self.char,
-            (entity.x, entity.y),
-            self.fg, self.bg
+            (entity.x - offset_x, entity.y - offset_y),
+            (self.char, self.fg, self.bg)
         )
 
 
@@ -71,6 +72,6 @@ class Entity:
         self.entity_type.update(self, key)
 
 
-    def render(self):
+    def render(self, offset):
         """Render the entity to the screen"""
-        self.entity_type.render(self)
+        self.entity_type.render(self, offset)

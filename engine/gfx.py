@@ -176,12 +176,27 @@ def shutdown():
     sys.stdout.flush()
 
 
-def plot(char, pos, fg=-1, bg=-1):
+def size():
+    """Returns the terminal size"""
+
+    global _screenbuf
+
+    height, width = (0, 0)
+
+    if _screenbuf:
+        height = len(_screenbuf)
+        width = len(_screenbuf[0])
+
+    return (width, height)
+
+
+def plot(pos, block):
     """Set the character at the given position on screen"""
 
     global _screenbuf
 
     x, y = pos
+    char, fg, bg = block
 
     if y >= 0 and y < len(_screenbuf):
         row = _screenbuf[y]
@@ -189,9 +204,9 @@ def plot(char, pos, fg=-1, bg=-1):
         if x >= 0 and x < len(row):
 
             _, current_fg, current_bg = _screenbuf[y][x]
-            if fg < 0:
+            if fg is not None and fg < 0:
                 fg = current_fg
-            if bg < 0:
+            if bg is not None and bg < 0:
                 bg = current_bg
             _screenbuf[y][x] = (char, fg, bg)
 
@@ -202,18 +217,18 @@ def get(pos):
     global _screenbuf
 
     x, y = pos
-    value = (' ', WHITE, BLACK)
+    block = (' ', WHITE, BLACK)
 
     if y >= 0 and y < len(_screenbuf):
         row = _screenbuf[y]
 
         if x >= 0 and x < len(row):
-            value = row[x]
+            block = row[x]
 
-    return value
+    return block
 
 
-def cls(fg=WHITE, bg=BLACK):
+def cls(block):
     """Clear the screen"""
 
     global _screenbuf
@@ -222,7 +237,7 @@ def cls(fg=WHITE, bg=BLACK):
         row = _screenbuf[y]
 
         for x in range(0, len(row)):
-            _screenbuf[y][x] = (' ', fg, bg)
+            _screenbuf[y][x] = block
 
 
 def flip():
