@@ -3,33 +3,38 @@ import sys
 import tty
 import termios
 
-# TODO optimise rendering, so can be played efficiently over ssh
-#  - clear row with escape code
-#  - only draw chars needed on line
 
-# ASCII escape colours
-_ESCAPE_BLACK = '\u001b[30m'
-_ESCAPE_DARK_GREY = '\u001b[30;1m'
-_ESCAPE_DARK_RED = '\u001b[31m'
-_ESCAPE_RED = '\u001b[31;1m'
-_ESCAPE_DARK_GREEN = '\u001b[32m'
-_ESCAPE_GREEN = '\u001b[32;1m'
-_ESCAPE_DARK_YELLOW = '\u001b[33m'
-_ESCAPE_YELLOW = '\u001b[33;1m'
-_ESCAPE_DARK_BLUE = '\u001b[34m'
-_ESCAPE_BLUE = '\u001b[34;1m'
-_ESCAPE_DARK_MAGENTA = '\u001b[35m'
-_ESCAPE_MAGENTA = '\u001b[35;1m'
-_ESCAPE_DARK_CYAN = '\u001b[36m'
-_ESCAPE_CYAN = '\u001b[36;1m'
-_ESCAPE_GREY = '\u001b[37m'
-_ESCAPE_WHITE = '\u001b[37;1m'
+# colour enum, will be automatically mapped to FG / BG colors
+BLACK = 0
+WHITE = 1
+RED = 2
+GREEN = 3
+YELLOW = 4
+BLUE = 5
+CYAN = 6
+MAGENTA = 7
+
+# terminal escape colour codes
+_FG_BLACK = '\u001b[30m'
+_BG_BLACK = '\u001b[40m'
+_FG_RED = '\u001b[31m'
+_BG_RED = '\u001b[41m'
+_FG_GREEN = '\u001b[32m'
+_BG_GREEN = '\u001b[42m'
+_FG_YELLOW = '\u001b[33m'
+_BG_YELLOW = '\u001b[43m'
+_FG_BLUE = '\u001b[34m'
+_BG_BLUE = '\u001b[44m'
+_FG_MAGENTA = '\u001b[35m'
+_BG_MAGENTA = '\u001b[45m'
+_FG_CYAN = '\u001b[36m'
+_BG_CYAN = '\u001b[46m'
+_FG_WHITE = '\u001b[37m'
+_BG_WHITE = '\u001b[47m'
 
 
 # off screen double buffer
 _screenbuf = []
-
-
 
 
 def _tty_size():
@@ -60,12 +65,12 @@ def _reset():
 
 def _cursor_hide():
     """Hide the cursor from the terminal"""
-    sys.stdout.write("\033[?25l")
+    sys.stdout.write("\u001b[?25l")
 
 
 def _cursor_show():
     """Show the cursor from the terminal"""
-    sys.stdout.write("\033[?25h")
+    sys.stdout.write("\u001b[?25h")
 
 
 def _cursor_left(n=1):
@@ -83,6 +88,52 @@ def _clr_line():
     sys.stdout.write("\u001b[OK")
 
 
+def _bg_code(colour):
+    """Returns the escape code for the given background colour"""
+
+    if colour == WHITE:
+        code = _BG_WHITE
+    elif colour == RED:
+        code = _BG_RED
+    elif colour == GREEN:
+        code = _BG_GREEN
+    elif colour == YELLOW:
+        code = _BG_YELLOW
+    elif colour == BLUE:
+        code = _BG_BLUE
+    elif colour == CYAN:
+        code = _BG_CYAN
+    elif colour == MAGENTA:
+        code = _BG_MAGENTA
+    else:
+        code = _BG_BLACK
+
+    return code
+
+
+def _fg_code(colour):
+    """Returns the escape code for the given foreground colour"""
+
+    if colour == WHITE:
+        code = _FG_WHITE
+    elif colour == RED:
+        code = _FG_RED
+    elif colour == GREEN:
+        code = _FG_GREEN
+    elif colour == YELLOW:
+        code = _FG_YELLOW
+    elif colour == BLUE:
+        code = _FG_BLUE
+    elif colour == CYAN:
+        code = _FG_CYAN
+    elif colour == MAGENTA:
+        code = _FG_MAGENTA
+    else:
+        code = _FG_BLACK
+
+    return code
+
+
 def init():
 
     global _screenbuf
@@ -94,10 +145,22 @@ def init():
 
     _cursor_hide()
 
-    # clear the terminal ready for rendering
-    cls()
-    for i in range(0, len(_screenbuf)):
-        sys.stdout.write("\n")
+    # initialise the screen buffer
+
+    _screenbuf = []
+
+    (width, height) = _tty_size()
+    for y in range(0, height):
+
+        row = []
+        for x in range(0, width):
+            row.append(
+                (' ', WHITE, BLACK)
+            )
+
+        _screenbuf.append(row)
+
+    flip()
 
 
 def shutdown():
@@ -116,12 +179,22 @@ def shutdown():
     sys.stdout.flush()
 
 
-def set(x, y, char):
+def plot(x, y, char, fg=-1, bg=-1):
     """Set the character at the given position on screen"""
 
     global _screenbuf
 
-    _screenbuf[y][x] = char
+    if y > 0 and y < len(_screenbuf):
+
+        row = _screenbuf[y]
+        if x > 0 and x < len(row):
+
+            _, current_fg, current_bg = _screenbuf[y][x]
+            if fg < 0:
+                fg = current_fg
+            if bg < 0:
+                bg = current_bg
+            _screenbuf[y][x] = (char, fg, bg)
 
 
 def get(x, y):
@@ -129,17 +202,19 @@ def get(x, y):
 
     global _screenbuf
 
-    value = ' '
+    value = (' ', WHITE, BLACK)
 
-    if len(_screenbuf) >= y:
+    if y > 0 and y < len(_screenbuf):
+
         row = _screenbuf[y]
-        if len(row) >= x:
+        if x > 0 and x < len(row):
+
             value = row[x]
 
     return value
 
 
-def cls():
+def cls(fg=WHITE, bg=BLACK):
     """Clear the screen"""
 
     global _screenbuf
@@ -151,7 +226,9 @@ def cls():
 
         row = []
         for x in range(0, width):
-            row.append(' ')
+            row.append(
+                (' ', fg, bg)
+            )
 
         _screenbuf.append(row)
 
@@ -167,21 +244,33 @@ def flip():
         _cursor_left(len(_screenbuf[0]))
 
     # render each row in the screenbuf
-    count = 1
-    for row in _screenbuf:
-        count += 1
+    for y in range(0, len(_screenbuf)-1):
+        row = _screenbuf[y]
 
         # render each cell in the row
-        for char in row:
+        x = 0
+        while x < len(row)-1:
+            char, fg, bg = row[x]
+
+            # TODO optimise this rendering
+            #      1. output newline instead of spaces at end of line
+            #      2. only set bg/fg colours if they have changed, not every time
+
             if char == ' ':
-                string = "%s%s" % ("\u001b[40;1m", ' ')
+                string = "%s " % _bg_code(bg)
                 sys.stdout.write(string)
             else:
-                string = "%s%s%s" % ("\u001b[42m", _ESCAPE_DARK_RED, char)
+                string = "%s%s%s" % (_bg_code(bg), _fg_code(fg), char)
                 sys.stdout.write(string)
 
+            # assume all non-ascii characters are emoji, and double space them
+            if ord(char) > 127:
+                x += 1  # skip next char since emoji are doublewidth
+
+            x += 1
+
         # add newlines for all but the last row
-        if count < len(_screenbuf):
+        if y < len(_screenbuf):
             sys.stdout.write("\n")
 
     # flush the output buffer so the terminal actually renders the screen
