@@ -7,17 +7,14 @@ class EntityType:
     Child classes should override update() for each entity type.
     """
 
-    def __init__(self, char, fg=None, bg=None):
+    def __init__(self, block):
         """
 
-        :param char: Character displayed for the entity
-        :param fg: Foreground colour of the entity
-        :param bg: Background colour of the entity
+        :param block: 3 tuple of the block for the entity (char, fg, bg)
         """
 
-        self.char = char
-        self.fg = fg
-        self.bg = bg
+        self.block = block
+        self.game = None
 
 
     def spawn(self, pos):
@@ -26,7 +23,11 @@ class EntityType:
         :param pos: 2 tuple of the new entities location on the map
         """
 
-        return Entity(self, pos)
+        entity = Entity(self)
+        entity.game = self.game
+        entity.x, entity.y = pos
+
+        return entity
 
 
     def update(self, entity, key):
@@ -48,7 +49,7 @@ class EntityType:
 
         engine.gfx.plot(
             (entity.x - offset_x, entity.y - offset_y),
-            (self.char, self.fg, self.bg)
+            self.block
         )
 
 
@@ -56,15 +57,15 @@ class Entity:
     """Single entity. Will have a single EntityType associated with it."""
 
 
-    def __init__(self, entity_type, pos):
+    def __init__(self, entity_type):
         """
 
         :param entity_type: The EntityType for the entity
-        :param pos: 2 tuple of the entities position on the map
         """
 
-        self.x, self.y = pos
+        self.x, self.y = 0, 0
         self.entity_type = entity_type
+        self.game = None
 
 
     def update(self, key):

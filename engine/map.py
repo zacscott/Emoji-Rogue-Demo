@@ -8,6 +8,11 @@ class Map:
     def __init__(self, **kwargs):
         """
 
+        :param dimensions: 2 tuple of the nmap dimensions. Default = (112, 32)
+        :param perimeter_block: Block to insert around the perimeter of the map. Default =
+            ('X', engine.gfx.BLACK, engine.gfx.WHITE)
+        :param default_block: The default map block which the map is flood filled with to begin with. Default =
+            (' ', engine.gfx.WHITE, engine.gfx.BLACK)
         """
 
         self.map = []
@@ -15,7 +20,7 @@ class Map:
 
         # parse kwargs
 
-        self.dimensions = kwargs['dimensions'] if 'dimensions' in kwargs else (120, 32)
+        self.dimensions = kwargs['dimensions'] if 'dimensions' in kwargs else (112, 32)
 
         if 'perimeter_block' in kwargs:
             self.perimeter_block = kwargs['perimeter_block']
@@ -48,7 +53,7 @@ class Map:
 
         # left & right
         for y in range(0, height):
-            self.set((10, y), self.perimeter_block)
+            self.set((0, y), self.perimeter_block)
             self.set((width-1, y), self.perimeter_block)
 
 
@@ -61,11 +66,8 @@ class Map:
 
         x, y = pos
 
-        if y >= 0 and y < len(self.map):
-            row = self.map[y]
-
-            if x >= 0 and x < len(row):
-                self.map[y][x] = block
+        if self.is_in_bounds(pos):
+            self.map[y][x] = block
 
 
     def get(self, pos):
@@ -77,16 +79,13 @@ class Map:
         x, y = pos
         block = self.default_block
 
-        if y >= 0 and y < len(self.map):
-            row = self.map[y]
-
-            if x >= 0 and x < len(row):
-                block = self.map[y][x]
+        if self.is_in_bounds(pos):
+            block = self.map[y][x]
 
         return block
 
 
-    def is_empty(pos):
+    def is_empty(self, pos):
         """
         Returns whether the given spot on the map is empty and an entity can occupy it.
         :param pos: 2 tuple of the position on the map to check
@@ -96,6 +95,21 @@ class Map:
         is_empty = char == ' '
 
         return is_empty
+
+
+    def is_in_bounds(self, pos):
+        """
+        Returns whether the given position is within the bounds of the map
+        :param pos: 2 tuple of the position on the map to check
+        """
+
+        x, y = pos
+        mapw, maph = self.dimensions
+
+        in_bounds = x >= 0 and x < mapw
+        in_bounds = in_bounds and y >= 0 and y < maph
+
+        return in_bounds
 
 
     def render(self, offset):

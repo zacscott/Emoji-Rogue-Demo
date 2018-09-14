@@ -1,5 +1,6 @@
 import engine
 import engine.gfx
+import engine.map
 import game.entities
 
 
@@ -10,55 +11,40 @@ class Game(engine.Game):
 
         self.define_entity_type('player', game.entities.PlayerEntityType())
 
-        # self.spawn('player', (10, 10))
         self.spawn('player', (10, 10))
+
+        self.generate_map()
+        # self.generate_npcs()
 
 
     def pre_update(self, key):
 
-        if key == 'q':
+        # exit game if ESC key is pressed
+        if ord(key) == 27:
             self.running = False
 
 
-    def post_update(self, key):
+    def generate_map(self):
 
-        term_width, term_height = engine.gfx.size()
-        map_width, map_height = self.map.dimensions
+        self.map = engine.map.Map(
+            perimeter_block=('🌳', None, engine.gfx.GREEN),
+            default_block=(' ', None, engine.gfx.GREEN)
+        )
 
-        # player_ent = self.find('player')
-        player_ent = self.entities[0]
+        for y in range(1, 10):
 
-        camx = int(player_ent.x - term_width/2)
-        camx = max(camx, 0)
-        camx = min(camx, map_width-term_width)
+            for x in range(1, 10):
 
-        camy = int(player_ent.y - term_height/2)
-        camy = max(camy, 0)
-        camy = min(camy, map_height-term_height)
+                self.map.set(
+                    (x, y),
+                    ('🌲', None, engine.gfx.GREEN)
+                )
 
-        self.camera = (camx, camy)
+        for y in range(10, 20):
 
+            for x in range(10, 20):
 
-    # def render(self):
-
-    #     engine.gfx.cls()
-
-    #     engine.gfx.plot(9, 11, '#')
-    #     engine.gfx.plot(9, 10, '#')
-    #     engine.gfx.plot(9, 9, '#')
-    #     engine.gfx.plot(10, 11, '#')
-    #     engine.gfx.plot(10, 10, '#')
-    #     engine.gfx.plot(10, 9, '#')
-    #     engine.gfx.plot(11, 11, '#')
-    #     engine.gfx.plot(11, 10, '#')
-    #     engine.gfx.plot(11, 9, '#')
-
-    #     engine.gfx.plot(self.x, self.y, '👨')
-
-    #     engine.gfx.plot(16, 16, '💊')
-
-    #     engine.gfx.plot(20, 20, '🍩')
-
-    #     engine.gfx.plot(6, 6, '🗡')
-
-    #     engine.gfx.flip()
+                self.map.set(
+                    (x, y),
+                    ('🌊', None, engine.gfx.BLUE)
+                )

@@ -204,9 +204,9 @@ def plot(pos, block):
         if x >= 0 and x < len(row):
 
             _, current_fg, current_bg = _screenbuf[y][x]
-            if fg is not None and fg < 0:
+            if fg is None or fg < 0:
                 fg = current_fg
-            if bg is not None and bg < 0:
+            if bg is None or bg < 0:
                 bg = current_bg
             _screenbuf[y][x] = (char, fg, bg)
 

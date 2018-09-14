@@ -81,6 +81,7 @@ class Game:
         :param entity_type: The EntityType instance
         """
 
+        entity_type.game = self
         self.entity_types[name] = entity_type
 
 
