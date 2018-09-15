@@ -5,6 +5,13 @@ import engine.map
 import game.entities
 
 
+# TODO loading screen
+# TODO check can spawn area
+# TODO beach for oceans
+# TODO forests dont span multiple biomes
+# TODO basic NPCs, random movements
+
+
 class Game(engine.Game):
 
 
@@ -29,50 +36,90 @@ class Game(engine.Game):
 
         self.map = engine.map.Map(
             dimensions=(1000, 1000),
-            perimeter_block=('🌳', None, engine.gfx.GREEN),
+            perimeter_block=(' ', None, engine.gfx.GREEN),
             default_block=(' ', None, engine.gfx.GREEN)
         )
 
-        for i in range(0, 10):
+        for i in range(0, 100):
 
             which = i % 3
             if which == 0:
-                self.generate_biome(
-                    (' ', None, engine.gfx.YELLOW),
-                    ('🌵', None, engine.gfx.YELLOW)
-                )
-
+                self.generate_biome((' ', None, engine.gfx.YELLOW))
             elif which == 1:
-                self.generate_biome(
-                    (' ', None, engine.gfx.GREEN),
-                    ('🌲', None, engine.gfx.GREEN)
-                )
-
+                self.generate_biome((' ', None, engine.gfx.GREEN))
             else:
-                self.generate_biome(
-                    ('🌊', None, engine.gfx.BLUE),
-                    ('🌊', None, engine.gfx.BLUE)
-                )
+                self.generate_biome(('🌊', None, engine.gfx.BLUE))
+
+        for i in range(0, 100):
+            self.generate_forest()
 
 
-    def generate_biome(self, grass_block, forest_block):
+    def generate_biome(self, grass_block):
 
-        startx = random.randint(0, 100)
-        starty = random.randint(0, 100)
+        startx = random.randint(0, 1000)
+        starty = random.randint(0, 1000)
 
-        start_height = height = random.randint(100, 200)
         start_width = width = random.randint(100, 200)
 
-        for y in range(0, height):
+        y = 0
+        while width > 0:
 
             for x in range(0, width):
 
                 midx = int(startx - width/2)
-                midy = int(starty - start_height/2)
 
                 self.map.set(
-                    (midx + x, midy + y),
+                    (midx + x, starty + y),
                     grass_block
                 )
 
-            width -= random.randint(0, int(width/height)+1)
+                self.map.set(
+                    (midx + x, starty - y),
+                    grass_block
+                )
+
+            width -= random.randint(-2, 5)
+            y += 1
+
+
+    def generate_forest(self):
+
+        startx = random.randint(0, 1000)
+        starty = random.randint(0, 1000)
+
+        start_width = width = random.randint(50, 100)
+
+        y = 0
+        while width > 0:
+
+            for x in range(0, width):
+
+                midx = int(startx - width/2)
+
+                self.make_forest((midx + x, starty + y))
+                self.make_forest((midx + x, starty - y))
+
+            width -= random.randint(0, 2)
+            y += 1
+
+
+    def make_forest(self, pos):
+
+        char, fg, bg = self.map.get(pos)
+
+        block = None
+
+        if bg == engine.gfx.YELLOW:
+
+            block = ('🌵', None, engine.gfx.YELLOW)
+
+        elif bg == engine.gfx.GREEN:
+
+            if random.randint(0, 1):
+                block = ('🌲', None, engine.gfx.GREEN)
+            else:
+                block = ('🌳', None, engine.gfx.GREEN)
+
+        if random.randint(0, 2) == 0:
+            if block is not None:
+                self.map.set(pos, block)

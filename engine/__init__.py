@@ -166,7 +166,7 @@ class Game:
         self.pre_render()
 
         # draw out of bounds XXX, just in case something fucks up we can see where the map ends
-        engine.gfx.cls(('#', engine.gfx.BLACK, engine.gfx.RED))
+        engine.gfx.cls(('X', engine.gfx.BLACK, engine.gfx.RED))
 
         # step 1 render the map
         self.map.render(self.camera)
