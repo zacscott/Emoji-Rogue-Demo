@@ -11,6 +11,7 @@ import game.entities
 
 
 class Game(engine.Game):
+    """The demo game"""
 
 
     def init(self):
