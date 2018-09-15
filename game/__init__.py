@@ -4,9 +4,6 @@ import engine.gfx
 import engine.map
 import game.entities
 
-
-# TODO loading screen
-# TODO check can spawn area
 # TODO extract fractal generation loop
 
 
@@ -27,7 +24,7 @@ class Game(engine.Game):
         self.generate_map()
         # self.generate_npcs()
 
-        self.spawn('player', (10, 10))
+        self.spawn_player()
 
 
     def pre_update(self, key):
@@ -184,3 +181,35 @@ class Game(engine.Game):
         if random.randint(0, 3) == 0:
             if block is not None:
                 self.map.set(pos, block)
+
+
+    def spawn_player(self):
+        """Spawn the player somewhere relatively empty on the map"""
+
+        can_spawn = False
+
+        # check some random points on the map until we find a decent spawn point
+        while not can_spawn:
+
+            map_width, map_height = self.map.dimensions
+            spawnx = random.randint(0, map_width)
+            spawny = random.randint(0, map_height)
+
+            # search area around spawn point, to check it is clear
+            can_spawn = True
+            for y in range(-5, 5):
+
+                for x in range(-5, 5):
+                    spawn_point = (spawnx + x, spawny + y)
+
+                    can_spawn = can_spawn and self.map.is_in_bounds(spawn_point)
+                    can_spawn = can_spawn and self.map.is_empty(spawn_point)
+
+                    if not can_spawn:
+                        break
+
+                if not can_spawn:
+                    break
+
+        # spawn player now we have foun a good point
+        self.spawn('player', (spawnx, spawny))
