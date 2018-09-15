@@ -16,6 +16,12 @@ class Game(engine.Game):
 
     def init(self):
 
+        # first draw the loading screen
+
+        print("\n  BUILDING WORLD ...")
+
+        # then generate the map + entities
+
         self.define_entity_type('player', game.entities.PlayerEntityType())
 
         self.generate_map()
@@ -45,14 +51,14 @@ class Game(engine.Game):
 
             which = i % 2
             if which:
-                # dessert
+                # desert
                 self.generate_biome((' ', None, engine.gfx.YELLOW))
             else:
                 # grass
                 self.generate_biome((' ', None, engine.gfx.GREEN))
 
         # randomly generate some oceans on the map
-        for i in range(0, 50):
+        for i in range(0, 40):
             self.generate_ocean()
 
         # randomly generate a bunch of forests on the map
@@ -94,7 +100,7 @@ class Game(engine.Game):
         startx = random.randint(0, 1000)
         starty = random.randint(0, 1000)
 
-        start_width = width = random.randint(100, 200)
+        start_width = width = random.randint(75, 150)
 
         y = 0
         while width > 10:
