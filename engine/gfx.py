@@ -158,6 +158,8 @@ def init():
             row.append((' ', WHITE, BLACK))
         _screenbuf.append(row)
 
+        sys.stdout.write("\n")
+
     flip()
 
 
