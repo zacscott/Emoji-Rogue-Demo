@@ -176,6 +176,7 @@ def shutdown():
 
     _cursor_show()
 
+    sys.stdout.write("\n")
     sys.stdout.flush()
 
 

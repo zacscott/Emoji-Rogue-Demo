@@ -1,13 +1,15 @@
 
-# Emoji Sprites Demo
+# Emoji Rogue Demo
 
-A prototype/demo of using Emoji as sprites in a console based game.
+![Python Version](https://img.shields.io/badge/python-3.5%2C%203.6-blue.svg)
 
-[TODO screenshot]
+A prototype/demo of using Emoji as sprites in a terminal rogue-like game.
 
-## Install
+![screenshot](screenshot.png)
 
-There are no external dependecies for the demo, it can be run in any vanilla Python 3.6 environment. I.e. like this:
+## Usage
+
+There are no external dependecies for the demo, it should run in any vanilla Python 3 environment. I.e. like this:
 
     $ python3 main.py
 

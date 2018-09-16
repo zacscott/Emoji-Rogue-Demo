@@ -4,8 +4,6 @@ import engine.gfx
 import engine.map
 import game.entities
 
-# TODO extract fractal generation loop
-
 
 class Game(engine.Game):
     """The demo game"""
